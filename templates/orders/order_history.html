@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Order History</h2>
+
+{% if orders %}
+<div class="list-group">
+    {% for order in orders %}
+    <div class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">Order #{{ order.id }}</h5>
+            <small class="text-muted">{{ order.created_at|date:"M d, Y H:i" }}</small>
+        </div>
+        <p class="mb-1">Status: <span
+                class="badge bg-{% if order.status == 'COMPLETED' %}success{% elif order.status == 'PENDING' %}warning{% elif order.status == 'CANCELLED' %}danger{% else %}info{% endif %}">{{
+                order.status }}</span></p>
+        <p class="mb-1">Total: Rs. {{ order.total_price }}</p>
+        <small>Items:
+            {% for item in order.items.all %}
+            {{ item.food.name }} (x{{ item.quantity }}){% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </small>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No orders found.</p>
+{% endif %}
+{% endblock %}

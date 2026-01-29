@@ -1,0 +1,8 @@
+Django>=4.2
+djangorestframework
+Pillow
+pandas
+scikit-learn
+numpy
+requests
+python-dotenv

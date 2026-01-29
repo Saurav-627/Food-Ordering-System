@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% if food.image %}
+        <img src="{{ food.image.url }}" class="img-fluid rounded" alt="{{ food.name }}">
+        {% else %}
+        <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded"
+            style="height: 400px;">No Image</div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h1>{{ food.name }}</h1>
+        <p class="text-muted">{{ food.category.name }}</p>
+        <h3 class="text-primary">Rs. {{ food.price }}</h3>
+        <p>{{ food.description }}</p>
+        <p><strong>Prep Time:</strong> {{ food.prep_time_min }} mins</p>
+
+        <form action="{% url 'add_to_cart' food.id %}" method="post" class="d-flex align-items-center mt-4">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="1" min="1" class="form-control me-2" style="width: 80px;">
+            <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+        </form>
+    </div>
+</div>
+
+<div class="mt-5">
+    <h3>You might also like</h3>
+    <div class="row">
+        {% for related in related_foods %}
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ related.name }}</h5>
+                    <p class="card-text">Rs. {{ related.price }}</p>
+                    <a href="{% url 'food_detail' related.slug %}"
+                        class="btn btn-sm btn-outline-primary stretched-link">View</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

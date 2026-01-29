@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Delivery Dashboard</h2>
+
+<ul class="nav nav-tabs mb-4" id="deliveryTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="assigned-tab" data-bs-toggle="tab" href="#assigned" role="tab">Assigned
+            Orders</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="available-tab" data-bs-toggle="tab" href="#available" role="tab">Available Orders</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="completed-tab" data-bs-toggle="tab" href="#completed" role="tab">Completed History</a>
+    </li>
+</ul>
+
+<div class="tab-content" id="deliveryTabContent">
+    <div class="tab-pane fade show active" id="assigned" role="tabpanel">
+        {% for order in assigned_orders %}
+        <div class="card mb-3 border-primary">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <span>Order #{{ order.id }}</span>
+                <span class="badge bg-light text-dark">{{ order.status }}</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Delivery to: {{ order.delivery_address }}</h5>
+                <p class="card-text">Customer: {{ order.user.username }} | Phone: {{ order.user.phone }}</p>
+                <p class="card-text">Total: Rs. {{ order.total_price }}</p>
+
+                <div class="mb-3">
+                    <h6>Items:</h6>
+                    <ul>
+                        {% for item in order.items.all %}
+                        <li>{{ item.quantity }} x {{ item.food.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="d-flex gap-2">
+                    {% if order.status == 'ACCEPTED' %}
+                    <form action="{% url 'update_order_status' order.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="status" value="ON_THE_WAY" class="btn btn-warning">Mark On The
+                            Way</button>
+                    </form>
+                    {% elif order.status == 'ON_THE_WAY' %}
+                    <form action="{% url 'update_order_status' order.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="status" value="COMPLETED" class="btn btn-success">Mark
+                            Completed</button>
+                    </form>
+                    {% endif %}
+
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ order.lat }},{{ order.lng }}"
+                        target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-map"></i> Navigate
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No assigned orders.</p>
+        {% endfor %}
+    </div>
+
+    <div class="tab-pane fade" id="available" role="tabpanel">
+        {% for order in available_orders %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Order #{{ order.id }} - {{ order.delivery_address }}</h5>
+                <p>Total: Rs. {{ order.total_price }}</p>
+                <a href="{% url 'accept_order' order.id %}" class="btn btn-primary">Accept Order</a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No available orders.</p>
+        {% endfor %}
+    </div>
+
+    <div class="tab-pane fade" id="completed" role="tabpanel">
+        <ul class="list-group">
+            {% for order in completed_orders %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Order #{{ order.id }} - {{ order.delivery_address }}
+                <span class="badge bg-success">Completed</span>
+            </li>
+            {% empty %}
+            <li class="list-group-item">No completed orders yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

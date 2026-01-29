@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Checkout</h2>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">Delivery Address</div>
+            <div class="card-body">
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="address-input" class="form-label">Search Address</label>
+                        <input type="text" class="form-control" id="address-input" name="address"
+                            placeholder="Start typing your address..." required>
+                        <input type="hidden" id="lat" name="lat">
+                        <input type="hidden" id="lng" name="lng">
+                    </div>
+
+                    <div id="map" style="height: 400px; width: 100%;" class="rounded mb-3"></div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Order Summary</div>
+            <ul class="list-group list-group-flush">
+                {% for item in cart.items.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="my-0">{{ item.food.name }}</h6>
+                        <small class="text-muted">Qty: {{ item.quantity }}</small>
+                    </div>
+                    <span class="text-muted">Rs. {{ item.total_price }}</span>
+                </li>
+                {% endfor %}
+                <li class="list-group-item d-flex justify-content-between bg-light">
+                    <span class="fw-bold">Total (NPR)</span>
+                    <span class="fw-bold">Rs. {{ cart.total_price }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&libraries=places"></script>
+<script>
+    function initMap() {
+        const kathmandu = { lat: 27.7172, lng: 85.3240 };
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 13,
+            center: kathmandu,
+        });
+
+        const input = document.getElementById("address-input");
+        const autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo("bounds", map);
+
+        const marker = new google.maps.Marker({
+            map: map,
+            anchorPoint: new google.maps.Point(0, -29),
+        });
+
+        autocomplete.addListener("place_changed", () => {
+            marker.setVisible(false);
+            const place = autocomplete.getPlace();
+
+            if (!place.geometry || !place.geometry.location) {
+                window.alert("No details available for input: '" + place.name + "'");
+                return;
+            }
+
+            if (place.geometry.viewport) {
+                map.fitBounds(place.geometry.viewport);
+            } else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(17);
+            }
+
+            marker.setPosition(place.geometry.location);
+            marker.setVisible(true);
+
+            document.getElementById("lat").value = place.geometry.location.lat();
+            document.getElementById("lng").value = place.geometry.location.lng();
+        });
+    }
+
+    window.initMap = initMap;
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">Categories</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item {% if not current_category %}active{% endif %}">
+                    <a href="{% url 'food_list' %}"
+                        class="text-decoration-none {% if not current_category %}text-white{% else %}text-dark{% endif %}">All</a>
+                </li>
+                {% for cat in categories %}
+                <li class="list-group-item {% if current_category == cat.slug %}active{% endif %}">
+                    <a href="{% url 'food_list' %}?category={{ cat.slug }}"
+                        class="text-decoration-none {% if current_category == cat.slug %}text-white{% else %}text-dark{% endif %}">{{
+                        cat.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <form class="d-flex mb-4" method="get">
+            <input class="form-control me-2" type="search" placeholder="Search foods..." name="search"
+                value="{{ search_query|default:'' }}">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <div class="row">
+            {% for food in foods %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if food.image %}
+                    <img src="{{ food.image.url }}" class="card-img-top food-img" alt="{{ food.name }}">
+                    {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center food-img">No
+                        Image</div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ food.name }}</h5>
+                        <p class="card-text text-muted">{{ food.description|truncatechars:50 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Rs. {{ food.price }}</span>
+                            <a href="{% url 'food_detail' food.slug %}" class="btn btn-sm btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No foods found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

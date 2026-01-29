@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 jumbotron text-center"
+    style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://source.unsplash.com/1600x900/?nepali,food'); background-size: cover; color: white;">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Welcome to Khaja Kham</h1>
+        <p class="col-md-8 fs-4 mx-auto">Authentic Nepali Food Delivered to Your Doorstep.</p>
+        <a href="{% url 'food_list' %}" class="btn btn-primary btn-lg" type="button">Order Now</a>
+    </div>
+</div>
+
+<h2 class="mb-4">Categories</h2>
+<div class="row mb-5">
+    {% for category in categories %}
+    <div class="col-md-2 col-6 mb-3">
+        <a href="{% url 'food_list' %}?category={{ category.slug }}" class="text-decoration-none text-dark">
+            <div class="card h-100 text-center py-4 hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<h2 class="mb-4">Featured Foods</h2>
+<div class="row">
+    {% for food in featured_foods %}
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            {% if food.image %}
+            <img src="{{ food.image.url }}" class="card-img-top food-img" alt="{{ food.name }}">
+            {% else %}
+            <div class="bg-secondary text-white d-flex align-items-center justify-content-center food-img">No Image
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ food.name }}</h5>
+                <p class="card-text text-muted">{{ food.description|truncatechars:60 }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Rs. {{ food.price }}</span>
+                    <a href="{% url 'food_detail' food.slug %}" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
