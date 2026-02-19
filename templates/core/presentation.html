@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Project Presentation Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .btn-gradient {
+            display: none;
+        }
+
+        .no-print {
+            display: none;
+        }
+
+        body {
+            background: white;
+        }
+
+        .card-shadow {
+            box-shadow: none !important;
+            border: 1px solid #eee;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-12 px-4 print:p-0">
+    <!-- Header Section -->
+    <div class="text-center mb-16 border-b-8 border-primary pb-10">
+        <h1 class="text-6xl font-black uppercase tracking-tighter text-gray-900 mb-2">Khaja Kham</h1>
+        <p class="text-2xl font-bold text-primary uppercase tracking-widest italic mb-6">BCA 6th Semester Final Project
+            Report</p>
+        <div class="flex justify-center gap-6 text-xs font-black uppercase text-gray-400 tracking-widest">
+            <span class="bg-gray-100 px-4 py-2 rounded-full">Django Backend</span>
+            <span class="bg-gray-100 px-4 py-2 rounded-full">Tailwind Architecture</span>
+            <span class="bg-gray-100 px-4 py-2 rounded-full">PostgreSQL/SQLite</span>
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <section class="mb-20">
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">01.
+            Executive Summary</h2>
+        <p class="text-lg text-gray-600 leading-relaxed font-medium">
+            Khaja Kham is a comprehensive food delivery ecosystem that integrates advanced data science algorithms with
+            real-time geospatial logistics.
+            The platform is built on three pillars: <strong>Predictive Personalization</strong> through ML,
+            <strong>Transparent Logistics</strong> via OpenStreetMap,
+            and <strong>Role-Based Efficiency</strong> through specialized interfaces for Customers, Riders, and Admins.
+        </p>
+    </section>
+
+    <!-- Detailed ERD Section -->
+    <section class="mb-20">
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">02.
+            Database Architecture (ERD)</h2>
+        <div
+            class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-100 mb-10 overflow-hidden">
+            <pre class="mermaid">
+erDiagram
+    %% User & Auth
+    USER {
+        int id PK
+        string username "Unique"
+        string password
+        string role "USER, DELIVERY_BOY, ADMIN"
+        string phone
+        text address
+        datetime date_joined
+    }
+
+    %% Catalog
+    CATEGORY {
+        int id PK
+        string name
+        string slug "Unique/SEO"
+        text description
+    }
+
+    FOOD {
+        int id PK
+        int category_id FK
+        string name
+        string slug "Unique/SEO"
+        text description
+        decimal price
+        string image
+        boolean is_available
+        int prep_time_min
+        datetime created_at
+    }
+
+    %% Transactions
+    CART {
+        int id PK
+        int user_id FK "Null for sessions"
+        string session_key "Unique for guests"
+        datetime created_at
+        datetime updated_at
+    }
+
+    CART_ITEM {
+        int id PK
+        int cart_id FK
+        int food_id FK
+        int quantity
+    }
+
+    ORDER {
+        int id PK
+        int user_id FK "Customer ID"
+        int delivery_boy_id FK "Rider ID (Assigned)"
+        string status "Enum: PENDING..COMPLETED"
+        decimal total_price "Locked at Checkout"
+        text delivery_address
+        float lat "Geo Data"
+        float lng "Geo Data"
+        datetime created_at
+    }
+
+    ORDER_ITEM {
+        int id PK
+        int order_id FK
+        int food_id FK
+        int quantity
+        decimal price_at_order "Historical Snapshot"
+    }
+
+    %% Intelligence
+    RATING {
+        int id PK
+        int user_id FK
+        int food_id FK
+        int rating "1-5 Scale"
+        text review
+    }
+
+    RECOMMENDATION_CACHE {
+        int id PK
+        string key "Matrix Identifier"
+        json data "Compressed Matrix"
+        datetime updated_at
+    }
+
+    %% Relationships
+    USER ||--o| CART : "manages"
+    CART ||--|{ CART_ITEM : "holds"
+    FOOD ||--o{ CART_ITEM : "indexed_in"
+    USER ||--o{ ORDER : "purchases"
+    USER ||--o{ ORDER : "fulfills"
+    ORDER ||--|{ ORDER_ITEM : "contains"
+    FOOD ||--o| ORDER_ITEM : "referenced_in"
+    CATEGORY ||--o{ FOOD : "categorizes"
+    USER ||--o{ RATING : "votes"
+    FOOD ||--o{ RATING : "valued_by"
+            </pre>
+            <p class="text-xs text-center text-gray-400 font-bold uppercase tracking-widest mt-8 italic">Full Entity
+                Relationship Schema (Physical Level)</p>
+        </div>
+    </section>
+
+    <!-- Algorithms in Detail -->
+    <section class="mb-20">
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-10 border-l-8 border-primary pl-6">03.
+            Core Algorithms</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="group">
+                <div
+                    class="bg-gray-900 text-white p-10 rounded-[2.5rem] h-full transition-transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-lucide="brain-circuit" class="w-8 h-8 text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-black uppercase mb-4 tracking-tight">Collaborative Filtering</h3>
+                    <p class="text-sm text-gray-400 font-medium leading-relaxed mb-6">
+                        Personalizes the menu per user using <strong>Cosine Similarity</strong>. It treats user behavior
+                        as vectors in a high-dimensional space to find "conceptual proximity" between foods.
+                    </p>
+                    <div class="bg-white/5 p-4 rounded-xl text-[10px] font-mono text-primary">
+                        Similarity = (A · B) / (||A|| * ||B||)
+                    </div>
+                </div>
+            </div>
+
+            <div class="group">
+                <div
+                    class="bg-white p-10 rounded-[2.5rem] border border-gray-100 h-full shadow-xl shadow-gray-50 transition-transform hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-teal/10 rounded-2xl flex items-center justify-center mb-6">
+                        <i data-lucide="layers" class="w-8 h-8 text-teal"></i>
+                    </div>
+                    <h3 class="text-xl font-black uppercase mb-4 tracking-tight">Co-occurrence Matrix</h3>
+                    <p class="text-sm text-gray-600 font-medium leading-relaxed mb-6">
+                        Drives the "People also ordered" feature. It scans completed transaction histories to find items
+                        that appear in the same buckets (Market Basket Analysis).
+                    </p>
+                    <div
+                        class="inline-block bg-teal/10 px-4 py-2 rounded-lg text-[10px] font-black text-teal uppercase tracking-widest">
+                        Transaction Mining Algorithm
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Flow Diagram -->
+    <section class="mb-20">
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">04.
+            Data Flow (Level 1)</h2>
+        <div class="bg-orange-50/30 p-10 rounded-[3rem] border border-orange-100/50">
+            <pre class="mermaid text-center">
+graph TD
+    subgraph Frontend
+        A[Client Browser]
+    end
+
+    subgraph Logic_Layer
+        B[Django Views]
+        C[Recommendation Engine]
+        D[Mapping Service]
+    end
+
+    subgraph Data_Store
+        E[(PostgreSQL/SQLite)]
+        F[(JSON Matrix Cache)]
+    end
+
+    A -->|POST: Order/Rating| B
+    B -->|Query/Update| E
+    E -->|Raw Data| C
+    C -->|Update Matrix| F
+    F -->|Top Recommendations| B
+    B -->|Render Template| A
+    D -->|Get GeoCoord| A
+            </pre>
+        </div>
+    </section>
+
+    <!-- Print CTA -->
+    <div
+        class="bg-primary text-white p-12 rounded-[3rem] text-center shadow-2xl shadow-orange-200 print:hidden relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-10 opacity-10">
+            <i data-lucide="printer" class="w-32 h-32"></i>
+        </div>
+        <h3 class="text-2xl font-black uppercase mb-4 relative z-10">Final Report Ready</h3>
+        <p class="text-white/80 text-sm mb-8 font-medium max-w-lg mx-auto relative z-10">This document contains all
+            architectural details required for your 6th Sem BCA presentation. Click below to generate your professional
+            PDF.</p>
+        <button onclick="window.print()"
+            class="bg-white text-primary px-12 py-5 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:scale-105 transition-all relative z-10">
+            Download Project PDF
+        </button>
+    </div>
+</div>
+
+<!-- Load Mermaid.js for diagrams -->
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral', fontFamily: 'Outfit' });
+</script>
+{% endblock %}

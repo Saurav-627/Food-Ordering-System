@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
-from foods.models import Category, Food
+from django.shortcuts import render, get_object_or_404, redirect
+from foods.models import Category, Food, Rating
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 def home(request):
@@ -36,9 +37,44 @@ def food_list(request):
 def food_detail(request, slug):
     food = get_object_or_404(Food, slug=slug)
     related_foods = Food.objects.filter(category=food.category).exclude(id=food.id)[:4]
+    ratings = food.ratings.all().order_by('-created_at')
+    
+    avg_rating = 0
+    if ratings.exists():
+        avg_rating = sum(r.rating for r in ratings) / ratings.count()
     
     context = {
         'food': food,
         'related_foods': related_foods,
+        'ratings': ratings,
+        'avg_rating': round(avg_rating, 1),
+        'rating_count': ratings.count(),
     }
     return render(request, 'core/food_detail.html', context)
+
+def presentation(request):
+    return render(request, 'core/presentation.html')
+
+@login_required
+def submit_review(request, food_id):
+    food = get_object_or_404(Food, id=food_id)
+    if request.method == 'POST':
+        rating_value = request.POST.get('rating')
+        review_text = request.POST.get('review')
+        
+        if rating_value:
+            Rating.objects.update_or_create(
+                user=request.user,
+                food=food,
+                defaults={
+                    'rating': int(rating_value),
+                    'review': review_text
+                }
+            )
+            from django.contrib import messages
+            messages.success(request, "Your review has been submitted.")
+        else:
+            from django.contrib import messages
+            messages.error(request, "Please provide a rating.")
+            
+    return redirect('food_detail', slug=food.slug)

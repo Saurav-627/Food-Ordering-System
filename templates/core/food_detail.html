@@ -22,7 +22,8 @@
         <div class="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-sm">
             <span class="flex items-center gap-1 text-primary font-bold">
                 <i data-lucide="star" class="w-4 h-4 fill-primary"></i>
-                4.8 <span class="text-gray-400 font-medium text-xs">(120+ reviews)</span>
+                {{ avg_rating|default:"0.0" }} <span class="text-gray-400 font-medium text-xs">({{ rating_count }}
+                    reviews)</span>
             </span>
         </div>
     </div>
@@ -106,6 +107,109 @@
 <!-- Related Foods Section -->
 {% if related_foods %}
 <div class="mt-24">
+    <div class="flex flex-col lg:flex-row gap-16">
+        <!-- Rating Form Section -->
+        <div class="lg:w-2/5 space-y-8">
+            <div class="space-y-4">
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight uppercase">Customer Reviews</h2>
+                <div class="h-1.5 w-20 bg-primary rounded-full"></div>
+                <p class="text-gray-500 font-medium text-sm max-w-xs">We value your feedback! Help others by sharing
+                    your experience.</p>
+            </div>
+
+            {% if user.is_authenticated %}
+            <form action="{% url 'submit_review' food.id %}" method="post"
+                class="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-gray-100/50 relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110">
+                </div>
+                {% csrf_token %}
+
+                <div class="relative z-10">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">Your Experience</p>
+
+                    <div class="flex flex-col items-center mb-10">
+                        <div class="flex items-center gap-1 mb-3" id="star-rating">
+                            {% for i in "12345" %}
+                            <button type="button" onclick="setRating({{ forloop.counter }})"
+                                class="star-btn p-2 text-gray-200 hover:text-primary transition-all hover:scale-110 active:scale-95">
+                                <i data-lucide="star" class="w-10 h-10"></i>
+                            </button>
+                            {% endfor %}
+                            <input type="hidden" name="rating" id="rating-input" required>
+                        </div>
+                        <span id="rating-label"
+                            class="text-xs font-black uppercase tracking-widest text-primary animate-pulse">Select a
+                            Rating</span>
+                    </div>
+
+                    <div class="relative mb-8">
+                        <textarea name="review" rows="4"
+                            class="w-full p-8 bg-gray-50 border-2 border-transparent focus:border-primary/20 focus:bg-white focus:ring-0 rounded-3xl text-sm font-medium transition-all"
+                            placeholder="How was the taste, presentation, and delivery?"></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full btn-gradient text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-100 transition-all hover:shadow-orange-200 active:scale-[0.98]">
+                        Post Review
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="bg-gray-50 p-10 rounded-[2.5rem] border border-dashed border-gray-200 text-center">
+                <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="lock" class="w-8 h-8 text-gray-300"></i>
+                </div>
+                <h4 class="text-sm font-black text-gray-900 uppercase mb-2">Login Required</h4>
+                <p class="text-xs text-gray-500 font-medium mb-8">You need to be logged in to share your thoughts.</p>
+                <a href="{% url 'login' %}"
+                    class="inline-block bg-primary px-8 py-3 rounded-xl text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-orange-100">Login
+                    Now</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Review List Section -->
+        <div class="flex-1">
+            <div class="space-y-8">
+                {% for r in ratings %}
+                <div
+                    class="bg-white p-8 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-all duration-300 group">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-primary font-black text-lg group-hover:bg-primary group-hover:text-white transition-colors">
+                                {{ r.user.username|first|upper }}
+                            </div>
+                            <div>
+                                <h4 class="font-black text-gray-900 uppercase text-sm tracking-tight mb-1">{{ r.user.username }}</h4>
+                                <div class="flex gap-0.5 text-primary">
+                                    {% for i in "12345" %}
+                                    <i data-lucide="star"
+                                        class="w-3.5 h-3.5 {% if forloop.counter <= r.rating %}fill-primary{% else %}text-gray-100{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ r.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <p
+                        class="text-gray-600 font-medium leading-relaxed italic border-l-4 border-gray-50 pl-6 group-hover:border-primary/20 transition-colors">
+                        "{{ r.review }}"</p>
+                </div>
+                {% empty %}
+                <div class="text-center py-20 bg-gray-50/50 rounded-[3rem] border border-dashed border-gray-100">
+                    <i data-lucide="message-square-dashed" class="w-16 h-16 text-gray-200 mx-auto mb-6"></i>
+                    <p class="text-gray-400 font-black uppercase text-xs tracking-widest">No reviews yet. Be the first
+                        to share!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-24">
     <div class="flex justify-between items-end mb-8">
         <div>
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight uppercase">You might also like</h2>
@@ -156,6 +260,31 @@
         if (parseInt(input.value) > 1) {
             input.value = parseInt(input.value) - 1;
         }
+    }
+
+    function setRating(val) {
+        document.getElementById('rating-input').value = val;
+        const stars = document.querySelectorAll('.star-btn');
+        const labels = {
+            1: 'Terrible 😞',
+            2: 'Poor 🙁',
+            3: 'OK 😐',
+            4: 'Good 🙂',
+            5: 'Amazing! 😍'
+        };
+
+        document.getElementById('rating-label').innerText = labels[val];
+        document.getElementById('rating-label').classList.remove('animate-pulse');
+
+        stars.forEach((star, index) => {
+            if (index < val) {
+                star.classList.add('text-primary', 'scale-110');
+                star.classList.remove('text-gray-200');
+            } else {
+                star.classList.remove('text-primary', 'scale-110');
+                star.classList.add('text-gray-200');
+            }
+        });
     }
 
     // Handle AJAX Add to Cart
