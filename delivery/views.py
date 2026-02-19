@@ -16,12 +16,14 @@ def dashboard(request):
     # Available orders (Pending and not assigned) - simplistic logic for now
     available_orders = Order.objects.filter(status='PENDING', delivery_boy__isnull=True).order_by('-created_at')
     
-    completed_orders = Order.objects.filter(delivery_boy=request.user, status='COMPLETED').order_by('-created_at')[:10]
+    completed_orders = Order.objects.filter(delivery_boy=request.user, status='COMPLETED').order_by('-created_at')
+    total_earnings = completed_orders.count() * 50
     
     return render(request, 'delivery/dashboard.html', {
         'assigned_orders': assigned_orders,
         'available_orders': available_orders,
-        'completed_orders': completed_orders,
+        'completed_orders': completed_orders[:10], # Show only last 10 in history
+        'total_earnings': total_earnings,
         'google_maps_key': settings.GOOGLE_MAPS_API_KEY
     })
 

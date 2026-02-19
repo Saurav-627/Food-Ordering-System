@@ -49,6 +49,14 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} - {self.user.username} ({self.status})"
 
+    @property
+    def total_items(self):
+        return sum(item.quantity for item in self.items.all())
+
+    @property
+    def total_item(self):
+        return self.total_items
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     food = models.ForeignKey(Food, on_delete=models.CASCADE)
@@ -57,3 +65,7 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.food.name} in Order #{self.order.id}"
+
+    @property
+    def total_price(self):
+        return self.price_at_order * self.quantity

@@ -1,95 +1,207 @@
 {% extends 'base.html' %}
 
+{% block title %}Rider Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .mini-map {
+        height: 150px;
+        width: 100%;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        z-index: 10;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Delivery Dashboard</h2>
-
-<ul class="nav nav-tabs mb-4" id="deliveryTab" role="tablist">
-    <li class="nav-item">
-        <a class="nav-link active" id="assigned-tab" data-bs-toggle="tab" href="#assigned" role="tab">Assigned
-            Orders</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" id="available-tab" data-bs-toggle="tab" href="#available" role="tab">Available Orders</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" id="completed-tab" data-bs-toggle="tab" href="#completed" role="tab">Completed History</a>
-    </li>
-</ul>
-
-<div class="tab-content" id="deliveryTabContent">
-    <div class="tab-pane fade show active" id="assigned" role="tabpanel">
-        {% for order in assigned_orders %}
-        <div class="card mb-3 border-primary">
-            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-                <span>Order #{{ order.id }}</span>
-                <span class="badge bg-light text-dark">{{ order.status }}</span>
+<div class="mb-12">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tighter uppercase">Rider <span
+                    class="text-teal italic">Dashboard</span></h1>
+            <div class="h-1.5 w-20 bg-teal rounded-full mt-3"></div>
+        </div>
+        <div class="flex items-center gap-4 bg-white px-6 py-4 rounded-3xl border border-gray-100 shadow-sm">
+            <div class="w-10 h-10 bg-teal/10 rounded-full flex items-center justify-center text-teal">
+                <i data-lucide="award" class="w-6 h-6"></i>
             </div>
-            <div class="card-body">
-                <h5 class="card-title">Delivery to: {{ order.delivery_address }}</h5>
-                <p class="card-text">Customer: {{ order.user.username }} | Phone: {{ order.user.phone }}</p>
-                <p class="card-text">Total: Rs. {{ order.total_price }}</p>
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Earnings</p>
+                <p class="text-lg font-black text-gray-900 italic">Rs. {{ total_earnings }}</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <div class="mb-3">
-                    <h6>Items:</h6>
-                    <ul>
-                        {% for item in order.items.all %}
-                        <li>{{ item.quantity }} x {{ item.food.name }}</li>
-                        {% endfor %}
-                    </ul>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <!-- Active Assignments -->
+    <div class="space-y-8">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-3">
+                <i data-lucide="truck" class="w-6 h-6 text-teal"></i>
+                Active Deliveries
+            </h2>
+            <span class="bg-teal text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{{ assigned_orders|length }} Active</span>
+        </div>
+
+        {% if assigned_orders %}
+        <div class="space-y-6">
+            {% for order in assigned_orders %}
+            <div
+                class="bg-white rounded-[2.5rem] p-8 border-l-8 border-teal shadow-xl shadow-gray-50 group hover:shadow-teal/5 transition-all duration-500">
+
+                <div id="map-{{ order.id }}" class="mini-map" data-lat="{{ order.lat }}" data-lng="{{ order.lng }}">
                 </div>
 
-                <div class="d-flex gap-2">
-                    {% if order.status == 'ACCEPTED' %}
-                    <form action="{% url 'update_order_status' order.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="status" value="ON_THE_WAY" class="btn btn-warning">Mark On The
-                            Way</button>
-                    </form>
-                    {% elif order.status == 'ON_THE_WAY' %}
-                    <form action="{% url 'update_order_status' order.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" name="status" value="COMPLETED" class="btn btn-success">Mark
-                            Completed</button>
-                    </form>
-                    {% endif %}
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h3 class="text-lg font-black text-gray-900 uppercase tracking-tight">Order #{{ order.id }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.created_at|date:"M d, H:i" }}</p>
+                    </div>
+                    <span
+                        class="bg-teal/10 text-teal px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">{{ order.status }}</span>
+                </div>
 
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ order.lat }},{{ order.lng }}"
-                        target="_blank" class="btn btn-outline-primary">
-                        <i class="bi bi-map"></i> Navigate
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"></i>
+                        <p class="text-sm text-gray-600 font-medium leading-relaxed italic">{{ order.delivery_address }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <form action="{% url 'update_order_status' order.id %}" method="post" class="flex-1">
+                        {% csrf_token %}
+                        {% if order.status == 'ACCEPTED' %}
+                        <button type="submit" name="status" value="ON_THE_WAY"
+                            class="w-full bg-teal text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-teal/20 hover:bg-teal-600 transition-all">Start
+                            Delivery</button>
+                        {% elif order.status == 'ON_THE_WAY' %}
+                        <button type="submit" name="status" value="COMPLETED"
+                            class="w-full bg-green-500 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-100 hover:bg-green-600 transition-all">Mark
+                            Delivered</button>
+                        {% endif %}
+                    </form>
+                    <a href="https://www.openstreetmap.org/?mlat={{ order.lat }}&mlon={{ order.lng }}#map=17/{{ order.lat }}/{{ order.lng }}"
+                        target="_blank"
+                        class="px-5 py-3.5 bg-gray-900 text-white rounded-2xl hover:bg-black transition-all flex items-center justify-center">
+                        <i data-lucide="navigation-2" class="w-5 h-5"></i>
                     </a>
                 </div>
             </div>
-        </div>
-        {% empty %}
-        <p>No assigned orders.</p>
-        {% endfor %}
-    </div>
-
-    <div class="tab-pane fade" id="available" role="tabpanel">
-        {% for order in available_orders %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Order #{{ order.id }} - {{ order.delivery_address }}</h5>
-                <p>Total: Rs. {{ order.total_price }}</p>
-                <a href="{% url 'accept_order' order.id %}" class="btn btn-primary">Accept Order</a>
-            </div>
-        </div>
-        {% empty %}
-        <p>No available orders.</p>
-        {% endfor %}
-    </div>
-
-    <div class="tab-pane fade" id="completed" role="tabpanel">
-        <ul class="list-group">
-            {% for order in completed_orders %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                Order #{{ order.id }} - {{ order.delivery_address }}
-                <span class="badge bg-success">Completed</span>
-            </li>
-            {% empty %}
-            <li class="list-group-item">No completed orders yet.</li>
             {% endfor %}
-        </ul>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-[2.5rem] p-12 text-center border border-gray-100 shadow-sm">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="bike" class="w-8 h-8 text-gray-200"></i>
+            </div>
+            <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">No assigned deliveries</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Available Orders -->
+    <div class="space-y-8">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-3">
+                <i data-lucide="briefcase" class="w-6 h-6 text-primary"></i>
+                Jobs Near You
+            </h2>
+            <span
+                class="bg-gray-100 text-gray-500 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">{{ available_orders|length }} Available</span>
+        </div>
+
+        <div class="space-y-6">
+            {% for order in available_orders %}
+            <div
+                class="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-gray-50 hover:border-primary/20 transition-all duration-500 group">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-black text-gray-900 uppercase tracking-tight">Order #{{ order.id }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Rs. {{ order.total_price }} Order Value</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 mb-8">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-primary flex-shrink-0 mt-0.5"></i>
+                    <p class="text-sm text-gray-600 font-medium leading-relaxed line-clamp-2 italic">{{ order.delivery_address }}</p>
+                </div>
+
+                <a href="{% url 'accept_order' order.id %}"
+                    class="w-full btn-gradient text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-100 flex items-center justify-center gap-3 transition-all active:scale-95">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> Accept Job
+                </a>
+            </div>
+            {% empty %}
+            <div class="bg-gray-50 rounded-[2.5rem] p-12 text-center border border-gray-100 border-dashed">
+                <p class="text-gray-400 font-bold text-xs uppercase tracking-widest">Everything is delivered. Good job!
+                </p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
+
+<!-- History Section -->
+{% if completed_orders %}
+<div class="mt-20">
+    <div class="mb-8">
+        <h2 class="text-xl font-black text-gray-900 uppercase tracking-tight flex items-center gap-3">
+            <i data-lucide="history" class="w-6 h-6 text-gray-400"></i>
+            Recent Completions
+        </h2>
+    </div>
+
+    <div class="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50/50">
+                <tr>
+                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Order</th>
+                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Customer</th>
+                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">
+                        Earning</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for order in completed_orders %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-8 py-5 font-black text-gray-900 text-sm">#{{ order.id }}</td>
+                    <td class="px-8 py-5 text-sm font-bold text-gray-600 uppercase">{{ order.user.username }}</td>
+                    <td class="px-8 py-5 text-xs text-gray-400 font-medium">{{ order.created_at|date:"M d, Y" }}</td>
+                    <td class="px-8 py-5 text-right font-black text-teal">Rs. 50.00</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const miniMaps = document.querySelectorAll('.mini-map');
+        miniMaps.forEach(container => {
+            const lat = container.dataset.lat;
+            const lng = container.dataset.lng;
+            if (lat && lng) {
+                const map = L.map(container.id, {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([lat, lng], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                L.marker([lat, lng]).addTo(map);
+            }
+        });
+    });
+</script>
 {% endblock %}

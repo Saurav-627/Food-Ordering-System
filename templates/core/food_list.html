@@ -1,58 +1,177 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card">
-            <div class="card-header">Categories</div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item {% if not current_category %}active{% endif %}">
-                    <a href="{% url 'food_list' %}"
-                        class="text-decoration-none {% if not current_category %}text-white{% else %}text-dark{% endif %}">All</a>
-                </li>
-                {% for cat in categories %}
-                <li class="list-group-item {% if current_category == cat.slug %}active{% endif %}">
-                    <a href="{% url 'food_list' %}?category={{ cat.slug }}"
-                        class="text-decoration-none {% if current_category == cat.slug %}text-white{% else %}text-dark{% endif %}">{{
-                        cat.name }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-    <div class="col-md-9">
-        <form class="d-flex mb-4" method="get">
-            <input class="form-control me-2" type="search" placeholder="Search foods..." name="search"
-                value="{{ search_query|default:'' }}">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
+{% block title %}Our Menu{% endblock %}
 
-        <div class="row">
-            {% for food in foods %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    {% if food.image %}
-                    <img src="{{ food.image.url }}" class="card-img-top food-img" alt="{{ food.name }}">
-                    {% else %}
-                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center food-img">No
-                        Image</div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ food.name }}</h5>
-                        <p class="card-text text-muted">{{ food.description|truncatechars:50 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Rs. {{ food.price }}</span>
-                            <a href="{% url 'food_detail' food.slug %}" class="btn btn-sm btn-primary">View</a>
-                        </div>
-                    </div>
-                </div>
+{% block content %}
+<div class="mb-12 text-center">
+    <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 uppercase tracking-tighter">Explores Our <span
+            class="text-primary italic">Delicious</span> Menu</h1>
+    <p class="text-gray-500 max-w-2xl mx-auto font-medium">From spicy momos to traditional thakali sets, explore the
+        best of Nepali cuisine delivered fresh to you.</p>
+</div>
+
+<!-- Filters & Search -->
+<div
+    class="mb-12 flex flex-col md:flex-row gap-6 justify-between items-center bg-white p-6 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-50">
+    <div class="flex flex-wrap gap-2">
+        <a href="{% url 'food_list' %}"
+            class="px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if not request.GET.category %}bg-primary text-white shadow-lg shadow-orange-100{% else %}bg-gray-50 text-gray-500 hover:bg-gray-100{% endif %}">
+            All Orders
+        </a>
+        {% for category in categories %}
+        <a href="?category={{ category.slug }}"
+            class="px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if request.GET.category == category.slug %}bg-primary text-white shadow-lg shadow-orange-100{% else %}bg-gray-50 text-gray-500 hover:bg-gray-100{% endif %}">
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <form method="get" class="relative group w-full md:w-80">
+        <div
+            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+            <i data-lucide="search" class="w-5 h-5"></i>
+        </div>
+        <input type="text" name="search" placeholder="Search for food..." value="{{ request.GET.search|default:'' }}"
+            class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-2xl text-sm font-medium transition-all">
+    </form>
+</div>
+
+<!-- Results -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+    {% for food in foods %}
+    <div
+        class="group relative bg-white rounded-[2.5rem] p-5 border border-gray-100 hover:border-primary/20 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-100">
+        <!-- Image Center -->
+        <div class="relative aspect-square rounded-3xl overflow-hidden mb-6 bg-gray-50">
+            {% if food.image %}
+            <img src="{{ food.image.url }}"
+                class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                alt="{{ food.name }}">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-gray-200">
+                <i data-lucide="utensils" class="w-20 h-20 opacity-20"></i>
             </div>
-            {% empty %}
-            <div class="col-12 text-center">
-                <p>No foods found.</p>
+            {% endif %}
+
+            <div
+                class="absolute top-4 right-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                <button
+                    class="w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 transition-colors">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                </button>
             </div>
-            {% endfor %}
+
+            <div
+                class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl shadow-sm border border-white/50">
+                <span class="text-xs font-black text-primary">Rs. {{ food.price }}</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-3">
+            <div class="flex justify-between items-start">
+                <h3
+                    class="text-lg font-black text-gray-900 group-hover:text-primary transition-colors uppercase tracking-tight truncate flex-1">
+                    {{ food.name }}</h3>
+                <span
+                    class="flex items-center gap-1 text-orange-400 text-xs font-bold bg-orange-50 px-2 py-1 rounded-lg">
+                    <i data-lucide="star" class="w-3 h-3 fill-orange-400"></i>
+                    4.5
+                </span>
+            </div>
+
+            <p class="text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed h-8">
+                {{ food.description }}
+            </p>
+
+            <div class="flex items-center gap-3 pt-2">
+                <span class="flex items-center gap-1 text-[10px] font-bold text-teal uppercase tracking-widest">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    {{ food.prep_time_min }} Min
+                </span>
+                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    {{ food.category.name }}
+                </span>
+            </div>
+
+            <div class="pt-4 flex gap-2">
+                <a href="{% url 'food_detail' food.slug %}"
+                    class="flex-1 bg-gray-900 text-white text-xs font-bold py-3.5 rounded-2xl text-center hover:bg-gray-800 transition-colors shadow-lg shadow-gray-200">
+                    Details
+                </a>
+                <button onclick="quickAddToCart('{{ food.id }}', this)"
+                    class="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-2xl hover:secondary shadow-lg shadow-orange-100 transition-all active:scale-90">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                </button>
+            </div>
         </div>
     </div>
+    {% empty %}
+    <div class="col-span-full py-20 text-center">
+        <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="search-x" class="w-12 h-12 text-gray-300"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900">No foods found</h3>
+        <p class="text-gray-500">Try adjusting your search or filters</p>
+        <a href="{% url 'food_list' %}"
+            class="inline-block mt-6 text-primary font-bold border-b-2 border-primary pb-1">Reset Filters</a>
+    </div>
+    {% endfor %}
 </div>
+
+<!-- Pagination (Optional) -->
+{% if is_paginated %}
+<div class="mt-16 flex justify-center gap-2">
+    <!-- Basic pagination here if needed -->
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+    function quickAddToCart(foodId, btn) {
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>';
+        lucide.createIcons();
+
+        const formData = new FormData();
+        formData.append('quantity', 1);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch(`/cart/add/${foodId}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const countBadge = document.getElementById('cart-count');
+                    const countBadgeMobile = document.getElementById('cart-count-mobile');
+                    if (countBadge) countBadge.innerText = data.cart_count;
+                    if (countBadgeMobile) countBadgeMobile.innerText = data.cart_count;
+
+                    btn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+                    btn.classList.replace('bg-primary', 'bg-teal');
+
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                        btn.classList.replace('bg-teal', 'bg-primary');
+                        lucide.createIcons();
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+                lucide.createIcons();
+            });
+    }
+</script>
+{% endblock %}
 {% endblock %}

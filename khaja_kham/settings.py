@@ -56,6 +56,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.google_maps_key', # Custom context processor
+                'orders.context_processors.cart_count',
             ],
         },
     },

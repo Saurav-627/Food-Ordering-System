@@ -1,29 +1,103 @@
 {% extends 'base.html' %}
 
+{% block title %}My Orders{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Order History</h2>
+<div class="mb-12">
+    <h1 class="text-4xl font-extrabold text-gray-900 tracking-tighter uppercase">Order <span
+            class="text-primary italic">History</span></h1>
+    <div class="h-1.5 w-20 bg-primary rounded-full mt-3"></div>
+</div>
 
 {% if orders %}
-<div class="list-group">
+<div class="space-y-8">
     {% for order in orders %}
-    <div class="list-group-item list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">Order #{{ order.id }}</h5>
-            <small class="text-muted">{{ order.created_at|date:"M d, Y H:i" }}</small>
+    <div
+        class="bg-white rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50 overflow-hidden group hover:border-primary/20 transition-all duration-500">
+        <div class="p-8 md:p-10">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 group-hover:bg-orange-50 group-hover:text-primary transition-colors">
+                        <i data-lucide="package" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 uppercase tracking-tight">Order #{{ order.id }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                            Placed on {{ order.created_at|date:"M d, Y • H:i" }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <span class="px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest
+                        {% if order.status == 'COMPLETED' %}bg-green-100 text-green-700
+                        {% elif order.status == 'PENDING' %}bg-orange-100 text-orange-700
+                        {% elif order.status == 'CANCELLED' %}bg-red-100 text-red-700
+                        {% else %}bg-blue-100 text-blue-700{% endif %}">
+                        {{ order.status }}
+                    </span>
+                    <div class="h-8 w-px bg-gray-100 hidden md:block"></div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ order.total_items }}
+                            Items • Grand Total</p>
+                        <p class="text-xl font-black text-primary">Rs. {{ order.total_price|default:"0.00" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8 border-t border-gray-50">
+                <div class="space-y-4">
+                    <p class="text-[10px] font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="utensils-crossed" class="w-3.5 h-3.5 text-primary"></i>
+                        Items Ordered
+                    </p>
+                    <ul class="space-y-3">
+                        {% for item in order.items.all %}
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="font-bold text-gray-600 truncate mr-4">{{ item.food.name }} <span
+                                    class="text-gray-300">×{{ item.quantity }}</span></span>
+                            <span class="font-black text-gray-900 flex-shrink-0">Rs. {{ item.total_price }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <p class="text-[10px] font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="navigation" class="w-3.5 h-3.5 text-teal"></i>
+                        Delivery Address
+                    </p>
+                    <p class="text-sm text-gray-500 font-medium leading-relaxed">
+                        {{ order.delivery_address }}
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-end">
+                    <button
+                        class="bg-gray-50 text-gray-900 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-100 transition-colors flex items-center gap-2">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                        Reorder
+                    </button>
+                </div>
+            </div>
         </div>
-        <p class="mb-1">Status: <span
-                class="badge bg-{% if order.status == 'COMPLETED' %}success{% elif order.status == 'PENDING' %}warning{% elif order.status == 'CANCELLED' %}danger{% else %}info{% endif %}">{{
-                order.status }}</span></p>
-        <p class="mb-1">Total: Rs. {{ order.total_price }}</p>
-        <small>Items:
-            {% for item in order.items.all %}
-            {{ item.food.name }} (x{{ item.quantity }}){% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </small>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<p>No orders found.</p>
+<div
+    class="max-w-xl mx-auto text-center py-20 bg-white rounded-[3rem] border border-gray-100 shadow-xl shadow-gray-50 mt-10">
+    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8">
+        <i data-lucide="history" class="w-12 h-12 text-gray-300"></i>
+    </div>
+    <h2 class="text-3xl font-black text-gray-900 tracking-tight uppercase mb-4">No orders yet</h2>
+    <p class="text-gray-500 font-medium mb-10 max-w-sm mx-auto">Hungry? Your food journey starts with your first order!
+    </p>
+    <a href="{% url 'food_list' %}"
+        class="btn-gradient inline-flex items-center px-10 py-5 rounded-2xl text-white font-black text-lg uppercase tracking-wider shadow-xl shadow-orange-200">
+        Order Now
+    </a>
+</div>
 {% endif %}
 {% endblock %}

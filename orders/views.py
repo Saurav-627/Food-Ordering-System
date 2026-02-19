@@ -6,6 +6,8 @@ from .models import Cart, CartItem, Order, OrderItem
 from .utils import get_cart
 from django.conf import settings
 
+from django.http import JsonResponse
+
 def add_to_cart(request, food_id):
     food = get_object_or_404(Food, id=food_id)
     cart = get_cart(request)
@@ -17,6 +19,15 @@ def add_to_cart(request, food_id):
     else:
         cart_item.quantity = quantity
     cart_item.save()
+    
+    total_items = sum(item.quantity for item in cart.items.all())
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success',
+            'message': f"{food.name} added to cart.",
+            'cart_count': total_items
+        })
     
     messages.success(request, f"{food.name} added to cart.")
     return redirect('food_detail', slug=food.slug)
