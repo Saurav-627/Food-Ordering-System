@@ -89,11 +89,52 @@
                     </div>
                 </div>
 
-                <div class="p-6 bg-orange-50 rounded-2xl border border-orange-100 flex items-start gap-4">
-                    <i data-lucide="info" class="w-5 h-5 text-primary mt-1"></i>
-                    <p class="text-sm text-orange-800 leading-relaxed font-medium">
-                        Using OpenStreetMap. Click anywhere on the map to drop a pin at your exact doorstep.
-                    </p>
+                <div class="space-y-6 pt-6 border-t border-gray-100">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-700 uppercase tracking-widest mb-4">Select Payment Method
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- COD -->
+                            <label
+                                class="relative flex flex-col p-6 cursor-pointer bg-gray-50 rounded-2xl border-2 border-transparent hover:border-primary/20 transition-all has-[:checked]:border-primary has-[:checked]:bg-orange-50/50 group">
+                                <input type="radio" name="payment_method" value="COD" class="sr-only">
+                                <div
+                                    class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center mb-4 text-gray-400 group-hover:text-primary transition-colors">
+                                    <i data-lucide="banknote" class="w-6 h-6"></i>
+                                </div>
+                                <span class="font-bold text-sm text-gray-900 uppercase tracking-tight">Cash on
+                                    Delivery</span>
+                                <span class="text-[10px] text-gray-400 font-black uppercase mt-1">Pay when you
+                                    receive</span>
+                            </label>
+
+                            <!-- eSewa -->
+                            <label
+                                class="relative flex flex-col p-6 cursor-pointer bg-gray-50 rounded-2xl border-2 border-transparent hover:border-primary/20 transition-all has-[:checked]:border-primary has-[:checked]:bg-orange-50/50 group">
+                                <input type="radio" name="payment_method" value="ESEWA" class="sr-only">
+                                <div
+                                    class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center mb-4 overflow-hidden">
+                                    <img src="https://esewa.com.np/common/images/esewa_logo.png"
+                                        class="w-8 h-auto object-contain" alt="eSewa">
+                                </div>
+                                <span class="font-bold text-sm text-gray-900 uppercase tracking-tight">eSewa</span>
+                                <span class="text-[10px] text-gray-400 font-black uppercase mt-1">Digital Wallet</span>
+                            </label>
+
+                            <!-- Khalti -->
+                            <label
+                                class="relative flex flex-col p-6 cursor-pointer bg-gray-50 rounded-2xl border-2 border-transparent hover:border-primary/20 transition-all has-[:checked]:border-primary has-[:checked]:bg-orange-50/50 group">
+                                <input type="radio" name="payment_method" value="KHALTI" class="sr-only">
+                                <div
+                                    class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center mb-4 overflow-hidden">
+                                    <img src="https://khalti.com/static/img/logo1.png" class="w-8 h-auto object-contain"
+                                        alt="Khalti">
+                                </div>
+                                <span class="font-bold text-sm text-gray-900 uppercase tracking-tight">Khalti</span>
+                                <span class="text-[10px] text-gray-400 font-black uppercase mt-1">Digital Wallet</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

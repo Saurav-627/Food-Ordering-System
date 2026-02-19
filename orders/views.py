@@ -70,10 +70,15 @@ def checkout(request):
         address = request.POST.get('address')
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
+        payment_method = request.POST.get('payment_method')
         
         if not address or not lat or not lng:
              messages.error(request, "Please provide a valid delivery address.")
              return render(request, 'orders/checkout.html', {'cart': cart, 'google_maps_key': settings.GOOGLE_MAPS_API_KEY})
+        
+        if not payment_method:
+            messages.error(request, "Please select a payment method.")
+            return render(request, 'orders/checkout.html', {'cart': cart, 'google_maps_key': settings.GOOGLE_MAPS_API_KEY})
 
         order = Order.objects.create(
             user=request.user,
@@ -81,7 +86,9 @@ def checkout(request):
             delivery_address=address,
             lat=lat,
             lng=lng,
-            status='PENDING'
+            status='PENDING',
+            payment_method=payment_method,
+            payment_status='PENDING' # Always pending until money is actually collected/received
         )
         
         for item in cart.items.all():

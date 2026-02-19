@@ -36,9 +36,23 @@ class Order(models.Model):
         ('CANCELLED', 'Cancelled'),
     )
 
+    PAYMENT_METHOD_CHOICES = (
+        ('COD', 'Cash on Delivery'),
+        ('ESEWA', 'eSewa'),
+        ('KHALTI', 'Khalti'),
+    )
+
+    PAYMENT_STATUS_CHOICES = (
+        ('PENDING', 'Pending'),
+        ('PAID', 'Paid'),
+        ('FAILED', 'Failed'),
+    )
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
     delivery_boy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_METHOD_CHOICES, default='COD')
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='PENDING')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_address = models.TextField()
     lat = models.FloatField(null=True, blank=True)

@@ -73,6 +73,28 @@
                     </p>
                 </div>
 
+                <div class="space-y-4">
+                    <p class="text-[10px] font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="credit-card" class="w-3.5 h-3.5 text-primary"></i>
+                        Payment Info
+                    </p>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Method</span>
+                            <span class="text-xs font-black text-gray-700 uppercase">{{ order.get_payment_method_display }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-400 font-bold uppercase">Status</span>
+                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest
+                                {% if order.payment_status == 'PAID' %}bg-green-100 text-green-700
+                                {% elif order.payment_status == 'FAILED' %}bg-red-100 text-red-700
+                                {% else %}bg-orange-100 text-orange-700{% endif %}">
+                                {{ order.payment_status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex items-center justify-end">
                     <button
                         class="bg-gray-50 text-gray-900 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-100 transition-colors flex items-center gap-2">

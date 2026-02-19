@@ -70,6 +70,14 @@
                         <p class="text-sm text-gray-600 font-medium leading-relaxed italic">{{ order.delivery_address }}
                         </p>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="credit-card" class="w-5 h-5 text-teal"></i>
+                        <span
+                            class="text-xs font-black uppercase tracking-widest {% if order.payment_method == 'COD' %}text-orange-600 animate-pulse{% else %}text-teal{% endif %}">
+                            {{ order.get_payment_method_display }}
+                            {% if order.payment_method == 'COD' %}(Collect Rs. {{ order.total_price }}){% else %}(PREPAID){% endif %}
+                        </span>
+                    </div>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
@@ -80,7 +88,8 @@
                             class="w-full bg-teal text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-teal/20 hover:bg-teal-600 transition-all">Start
                             Delivery</button>
                         {% elif order.status == 'ON_THE_WAY' %}
-                        <button type="submit" name="status" value="COMPLETED"
+                        <button type="submit" name="status" value="COMPLETED" {% if order.payment_method == 'COD' %}onclick="return confirm('Have you collected Rs. {{ order.total_price }} in cash correctly?')"
+                            {% endif %}
                             class="w-full bg-green-500 text-white py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-green-100 hover:bg-green-600 transition-all">Mark
                             Delivered</button>
                         {% endif %}

@@ -113,6 +113,8 @@ erDiagram
         int user_id FK "Customer ID"
         int delivery_boy_id FK "Rider ID (Assigned)"
         string status "Enum: PENDING..COMPLETED"
+        string payment_method "Enum: COD, ESEWA, KHALTI"
+        string payment_status "Enum: PENDING, PAID, FAILED"
         decimal total_price "Locked at Checkout"
         text delivery_address
         float lat "Geo Data"

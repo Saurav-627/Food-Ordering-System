@@ -7,7 +7,7 @@ The Khaja Kham project is architected using a decoupled application strategy (Co
 | Entity | Logic & Neglected Parts | Scalability Factor |
 | :--- | :--- | :--- |
 | **User (Custom)** | Distinguishes between 3 roles. **Neglected Part**: Includes `address` and `phone` which are critical for Rider navigation but often missed in basic auth systems. | Can be extended for Merchant roles. |
-| **Order** | Handles geospatial data (`lat`, `lng`) and a `delivery_boy` FK. **Neglected Part**: Specifically tracks `total_price` as a static field to prevent data drift if food prices change later. | Ready for GIS analysis. |
+| **Order** | Handles geospatial data (`lat`, `lng`) and a `delivery_boy` FK. **Neglected Part**: Specifically tracks `total_price` as a static field to prevent data drift. Now includes `payment_method` (COD, eSewa, Khalti) and `payment_status` for financial reconciliation. | Ready for GIS analysis and payment gateway integration. |
 | **OrderItem** | **Neglected Part**: Uses `price_at_order`. This is a professional business requirement to ensure historical receipts remain accurate even if the menu price is updated. | Supports financial auditing. |
 | **Food & Category** | Uses `slug` for SEO-friendly URLs. Includes `prep_time_min` for delivery window estimation. | Ready for multi-branch scaling. |
 
@@ -71,6 +71,8 @@ erDiagram
         int user_id FK "Customer ID"
         int delivery_boy_id FK "Rider ID (Assigned)"
         string status "Enum: PENDING..COMPLETED"
+        string payment_method "Enum: COD, ESEWA, KHALTI"
+        string payment_status "Enum: PENDING, PAID, FAILED"
         decimal total_price "Locked at Checkout"
         text delivery_address
         float lat "Geo Data"

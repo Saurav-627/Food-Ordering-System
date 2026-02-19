@@ -54,6 +54,8 @@ def update_status(request, order_id):
         new_status = request.POST.get('status')
         if new_status in ['ON_THE_WAY', 'COMPLETED']:
             order.status = new_status
+            if new_status == 'COMPLETED':
+                order.payment_status = 'PAID'
             order.save()
             messages.success(request, f"Order #{order.id} status updated to {new_status}.")
             
