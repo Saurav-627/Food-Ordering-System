@@ -31,17 +31,16 @@ def login_view(request):
     if request.method == 'POST':
         identifier = request.POST.get('username') 
         password = request.POST.get('password')
+        form = AuthenticationForm(request, data=request.POST)
         
         from users.models import User
-        user_obj = None
+        auth_username = identifier
         if '@' in identifier:
             try:
                 user_obj = User.objects.get(email=identifier)
                 auth_username = user_obj.username
             except User.DoesNotExist:
-                auth_username = identifier
-        else:
-            auth_username = identifier
+                pass
 
         user = authenticate(username=auth_username, password=password)
         
