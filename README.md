@@ -1,119 +1,183 @@
-# 🍛 Khaja Kham - Smart Food Delivery Ecosystem
+# 🍜 Khaja Kham - Smart Food Delivery & Logistics Ecosystem
 
-Khaja Kham is a high-performance, feature-rich Django web application designed for a modern food delivery business. It integrates **Machine Learning** for personalized recommendations and **OpenStreetMap** for real-time logistics, wrapped in a premium, responsive UI.
+[![Django Framework](https://img.shields.io/badge/Backend-Django-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![Machine Learning](https://img.shields.io/badge/ML-Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn)](https://scikit-learn.org/)
+[![PostgreSQL Support](https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Python](https://img.shields.io/badge/Language-Python-3776AB?style=for-the-badge&logo=python)](https://www.python.org/)
 
----
-
-## 🚀 Core Features
-
--   **User Dashboard**: Professional catalog with search, categorization, and AJAX-powered cart.
--   **Rider/Delivery Panel**: Specialized interface for "Delivery Boys" to manage, track, and fulfill orders.
--   **Recommendation Engine**: Dual-layer ML using Collaborative Filtering (Cosine Similarity) and Market Basket Analysis.
--   **Dynamic Rating System**: Interactive 5-star rating system with text reviews and sentiment-based labeling.
--   **Geo-Logistics**: Integrated OpenStreetMap/Leaflet tracking (Privacy-focused, no API key costs).
--   **Order Lifecycle**: Real-time status updates from `Pending` -> `Confirmed` -> `On the way` -> `Completed`.
+**Khaja Kham** is a premium, full-stack food delivery ecosystem built with Django. It features a sophisticated recommendation engine powered by Machine Learning, real-time logistics tracking using OpenStreetMap (OSM) and Leaflet, and a robust order management system designed for scale.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
--   **Backend**: Django 4.0+, Python 3.10+
--   **Frontend**: Vanilla HTML5, Tailwind CSS (Custom Config), Lucide Icons
--   **Database**: SQLite (Development) / PostgreSQL (Production ready)
--   **ML Layer**: Scikit-Learn, NumPy, Pandas (Similarity Matrix Cache)
--   **Maps**: Leaflet.js & OpenStreetMap (OSM)
-
----
-
-## 💻 Local Setup (Development)
-
-1. **Clone & Enter Territory**
-   ```bash
-   git clone <repository-url>
-   cd Khaja-Kham
-   ```
-
-2. **Setup Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # OR: venv\Scripts\activate (Windows)
-   ```
-
-3. **Install Core Engine**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Synchronize Database**
-   ```bash
-   python manage.py makemigrations
-   python manage.py migrate
-   ```
-
-5. **Bootstrap Intelligence & Data**
-   ```bash
-   # Seed 25+ Nepali foods & test users
-   python manage.py seed_dummy_data
-
-   # Pre-compute Recommendation Similarity Matrix
-   python manage.py train_recommendations
-   ```
-
-6. **Ignition**
-   ```bash
-   python manage.py runserver
-   ```
+-   🌐 **Smart User Dashboard**: Experience a seamless browsing experience with AJAX-powered cart functionality, advanced search, and dynamic food categorization.
+-   🚴 **Rider Command Center**: Dedicated panel for delivery partners with shift management, live order tracking, and delivery fulfillment tools.
+-   🧠 **ML-Powered Recommendations**: 
+    -   *Collaborative Filtering*: Personalized suggestions based on user behavior (Cosine Similarity).
+    -   *Market Basket Analysis*: Intelligent "Frequently Bought Together" prompts.
+-   🗺️ **Real-time Geo-Logistics**: Integrated map systems using OpenStreetMap and Leaflet for rider tracking and delivery estimation without costly API fees.
+-   ⭐ **Dynamic Reviews**: High-performance rating system with sentiment-aware review analysis.
+-   💳 **Payment Integration Ready**: Architected for COD (Cash on Delivery), eSewa, and Khalti payment gateways.
+-   ⚡ **Enterprise-Grade Architecture**: Decoupled application modules (Foods, Orders, Users, Recommendations) for high maintainability.
 
 ---
 
-## 📱 Running on Other Devices (Local Network)
+## 🛠️ Technology Stack
 
-To access Khaja Kham from your phone or another laptop on the same Wi-Fi:
-
-1. **Find your Local IP**:
-   - Linux/Mac: `ifconfig` (Look for `inet` under `en0` or `wlan0`)
-   - Windows: `ipconfig` (Look for `IPv4 Address`)
-   - *Example: 192.168.1.15*
-
-2. **Run Server on All Interfaces**:
-   ```bash
-   python manage.py runserver 0.0.0.0:8000
-   ```
-
-3. **Access via Browser**:
-   On your phone, go to `http://192.168.1.15:8000`
+| Layer | Tools & Technologies |
+| :--- | :--- |
+| **Backend** | Django 4.2+, Django REST Framework, Python 3.10+ |
+| **Frontend** | Vanilla JS (ES6+), Tailwind CSS, Lucide Icons, Leaflet.js |
+| **Data & ML** | Scikit-Learn, NumPy, Pandas, Pillow (Image Processing) |
+| **Geolocation** | OpenStreetMap (OSM), Leaflet |
+| **Database** | SQLite (Dev) / PostgreSQL (Prod) |
+| **Environment** | python-dotenv for secure configuration |
 
 ---
 
-## 🏗️ Production Readiness Process (Deployment Checklist)
+## 🏗️ Project Architecture & Data Flow
 
-To move from "College Project" to "Real World Production":
+The system is built on a modular architecture that ensures scalability and separation of concerns.
 
-### 1. Security (Critical)
-- **Secret Key**: Move `SECRET_KEY` out of `settings.py` into Environment Variables.
-- **Debug Mode**: Set `DEBUG = False`.
-- **Allowed Hosts**: List your domain: `ALLOWED_HOSTS = ['khajakham.com.np', 'your-server-ip']`.
+### 📊 Database Schema (High-Level ERD)
+```mermaid
+erDiagram
+    USER ||--o| CART : "manages"
+    USER ||--o{ ORDER : "places"
+    USER ||--o{ RATING : "submits"
+    FOOD ||--o{ ORDER_ITEM : "contains"
+    ORDER ||--|{ ORDER_ITEM : "consists of"
+    CATEGORY ||--o{ FOOD : "categorizes"
+    FOOD ||--o{ RATING : "receives"
+```
 
-### 2. Database (PostgreSQL)
-Install `psycopg2-binary` and update `DATABASES` in `settings.py` to point to a production-grade PostgreSQL instance.
-
-### 3. Static & Media Management
-- Run `python manage.py collectstatic`.
-- Use **Nginx** to serve the `static_root` and `media_root`.
-- Use **Gunicorn** or **Daphne** as the WSGI/ASGI server.
-
-### 4. Recommendation Automation
-Setup a **Cron Job** or **Celery Beat** to run `python manage.py train_recommendations` every hour/day to update suggestions based on new orders.
+### 🔄 Order Lifecycle Flow
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING: Customer Checkout
+    PENDING --> ACCEPTED: Rider Assigns to Self
+    ACCEPTED --> ON_THE_WAY: Food Picked Up
+    ON_THE_WAY --> COMPLETED: Delivered & Paid
+    COMPLETED --> [*]
+```
 
 ---
 
-## 🔑 Test Credentials
-- **Super Administrator**: `admin` / `admin`
-- **Delivery Rider**: `rider` / `rider`
-- **Customer Account**: `user1` / `user1`
+## 🚀 Getting Started (Local Development)
+
+Follow these steps to set up the engine on your machine.
+
+### 1. Repository Setup
+```bash
+git clone <repository-url>
+cd Khaja-Kham
+```
+
+### 2. Environment Initialization
+Create a virtual environment to isolate project dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# OR: venv\Scripts\activate (Windows)
+```
+
+Install core dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Configuration (`.env`)
+Create a `.env` file in the root directory to manage your secrets:
+```env
+SECRET_KEY=yoursecretkeyhere
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+GOOGLE_MAPS_API_KEY=your_key_here (optional for advanced maps)
+```
+
+### 4. Database Synchronization
+Apply migrations to build the schema:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### 5. Seed Intelligence & Data
+Khaja Kham comes with built-in scripts to populate your system with test data:
+```bash
+# Seed 25+ Nepali foods, categories, and test user accounts
+python manage.py seed_dummy_data
+
+# Train the Recommendation Engine (Matrices)
+python manage.py train_recommendations
+```
+
+### 6. Ignition
+Launch the development server:
+```bash
+python manage.py runserver
+```
+Access the application at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
-## 📄 Documentation
-Deep technical details, ERD/DFD diagrams, and architectural analysis can be found in `DOCUMENTATION.md` or via the `/presentation/` route on the live server.
+## 📂 Project Structure
+
+```text
+Khaja-Kham/
+├── core/               # Main layout, utils, and custom commands
+├── users/              # Custom User model (Admin, Rider, Customer)
+├── foods/              # Menu management, Categories, Search logic
+├── orders/             # Cart, Checkout, and Order processing
+├── delivery/           # Rider dashboard and Logistics logic
+├── recommendations/    # ML Similarity Matrix and suggestion engine
+├── khaja_kham/         # Project heart (settings.py, urls.py)
+├── templates/          # Global UI templates
+├── media/              # Food images and user uploads
+└── manage.py           # Django CLI entry point
+```
+
+---
+
+## 🔑 Default Test Credentials
+
+| Role | Username | Password |
+| :--- | :--- | :--- |
+| **Super Admin** | `admin` | `admin` |
+| **Delivery Rider** | `rider` | `rider` |
+| **Test Customer** | `user1` | `user1` |
+
+---
+
+## 📡 API Endpoints (REST API)
+
+Khaja Kham provides a basic RESTful API for integrations (powered by DRF):
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/categories/` | `GET` | List all food categories |
+| `/api/foods/` | `GET` | List all available food items |
+| `/api/orders/` | `GET/POST` | Order management (Authenticated) |
+| `/api/cart/` | `GET` | View current user's cart |
+| `/api/recommendations/personal/` | `GET` | Get ML-based personalized suggestions |
+| `/api/recommendations/combos/` | `GET` | Get frequent food combinations |
+
+---
+
+## ☁️ Deployment Guidelines
+
+For production environments, ensure you:
+1. Set `DEBUG=False` in `.env`.
+2. Configure **PostgreSQL** in `settings.py`.
+3. Use **Gunicorn/Nginx** for serving static and media files.
+4. Schedule `train_recommendations` via **Crontab** for daily pattern updates.
+
+---
+
+## 📄 License & Documentation
+- For deep technical documentation, refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
+- Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+*Created with ❤️ by the Khaja Kham Team*
