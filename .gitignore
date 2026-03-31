@@ -19,8 +19,8 @@ env.bak/
 venv.bak/
 
 # Static & Media
-/media/
-/staticfiles/
+# /media/
+# /staticfiles/
 
 # IDE
 .idea/

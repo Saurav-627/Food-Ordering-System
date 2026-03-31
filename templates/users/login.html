@@ -14,18 +14,34 @@
                     account</a>
             </p>
         </div>
+
+        {% if form.errors %}
+        <div class="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6 animate-in slide-in-from-top duration-300">
+            <div class="flex items-start gap-3 text-red-700">
+                <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                <div class="text-sm">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <form class="mt-8 space-y-6" action="{% url 'login' %}" method="POST">
             {% csrf_token %}
             <div class="rounded-md space-y-4">
                 <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <i data-lucide="user" class="w-5 h-5"></i>
+                            <i data-lucide="mail" class="w-5 h-5"></i>
                         </div>
                         <input id="username" name="username" type="text" required
                             class="appearance-none relative block w-full px-10 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-all bg-gray-50"
-                            placeholder="Enter your username">
+                            placeholder="Enter your email or username" value="{{ form.username.value|default_if_none:'' }}">
                     </div>
                 </div>
                 <div>
@@ -35,8 +51,13 @@
                             <i data-lucide="lock" class="w-5 h-5"></i>
                         </div>
                         <input id="password" name="password" type="password" required
-                            class="appearance-none relative block w-full px-10 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-all bg-gray-50"
+                            class="appearance-none relative block w-full px-10 pr-12 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm transition-all bg-gray-50"
                             placeholder="••••••••">
+                        <button type="button" 
+                            onclick="togglePasswordVisibility('password', this)"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-primary transition-colors focus:outline-none">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -58,7 +79,7 @@
             </div>
 
             <div>
-                <button type="submit"
+                <button type="submit" data-loading-text="Signing in..."
                     class="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white btn-gradient focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-lg shadow-orange-100">
                     <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                         <i data-lucide="log-in"

@@ -5,4 +5,21 @@ from .models import User
 class SignUpForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'phone', 'address')
+        fields = ('username', 'email', 'phone', 'address', 'role')
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        # Remove any non-numeric characters for checking length
+        digits = ''.join(filter(str.isdigit, phone))
+        
+        if len(digits) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+            
+        # Ensure it has +977 prefix
+        if not phone.startswith('+977'):
+            phone = f"+977-{digits}"
+        else:
+            # Reformat to +977-XXXXXXXXXX
+            phone = f"+977-{digits}"
+            
+        return phone

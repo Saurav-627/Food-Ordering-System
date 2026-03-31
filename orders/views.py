@@ -48,16 +48,26 @@ def update_cart(request, item_id):
         if action == 'increase':
             item.quantity += 1
             item.save()
+            messages.success(request, f"Increased quantity of {item.food.name}.")
         elif action == 'decrease':
             item.quantity -= 1
             if item.quantity <= 0:
+                name = item.food.name
                 item.delete()
+                messages.success(request, f"Removed {name} from cart.")
             else:
                 item.save()
+                messages.success(request, f"Decreased quantity of {item.food.name}.")
         elif action == 'remove':
+            name = item.food.name
             item.delete()
+            messages.success(request, f"Removed {name} from cart.")
             
     return redirect('cart_view')
+
+import requests
+import json
+from django.urls import reverse
 
 @login_required
 def checkout(request):
@@ -88,7 +98,7 @@ def checkout(request):
             lng=lng,
             status='PENDING',
             payment_method=payment_method,
-            payment_status='PENDING' # Always pending until money is actually collected/received
+            payment_status='PENDING'
         )
         
         for item in cart.items.all():
@@ -99,11 +109,97 @@ def checkout(request):
                 price_at_order=item.food.price
             )
             
+        if payment_method == 'KHALTI':
+            # Khalti Payment Initiation
+            url = "https://dev.khalti.com/api/v2/epayment/initiate/"
+            
+            # return_url: reverse doesn't give full path, I need to build it.
+            return_url = request.build_absolute_uri(reverse('khalti_verify'))
+            
+            payload = json.dumps({
+                "return_url": return_url,
+                "website_url": request.build_absolute_uri(reverse('home')),
+                "amount": int(float(order.total_price) * 100), # amount in paisa
+                "purchase_order_id": str(order.id),
+                "purchase_order_name": f"Order #{order.id} - {request.user.username}",
+                "customer_info": {
+                    "name": request.user.get_full_name() or request.user.username,
+                    "email": request.user.email,
+                    "phone": request.user.phone or "9800000000" # fallback if phone not set
+                }
+            })
+            
+            headers = {
+                'Authorization': f'key {settings.KHALTI_SECRET_KEY}',
+                'Content-Type': 'application/json',
+            }
+
+            try:
+                response = requests.post(url, headers=headers, data=payload)
+                response_data = response.json()
+                
+                if 'pidx' in response_data:
+                    order.khalti_pidx = response_data['pidx']
+                    order.save()
+                    return redirect(response_data['payment_url'])
+                else:
+                    messages.error(request, f"Khalti initiation failed: {response_data.get('detail', 'Unknown error')}")
+                    order.delete() # cleanup if initiation failed
+                    return redirect('checkout')
+            except Exception as e:
+                messages.error(request, f"Error connecting to Khalti: {str(e)}")
+                order.delete()
+                return redirect('checkout')
+                
+        # For COD and others
         cart.items.all().delete() # Clear cart
         messages.success(request, "Order placed successfully!")
         return redirect('order_history')
         
     return render(request, 'orders/checkout.html', {'cart': cart, 'google_maps_key': settings.GOOGLE_MAPS_API_KEY})
+
+@login_required
+def khalti_verify(request):
+    pidx = request.GET.get('pidx')
+    status = request.GET.get('status') # Usually 'Completed'
+    purchase_order_id = request.GET.get('purchase_order_id')
+    transaction_id = request.GET.get('transaction_id')
+    
+    if not pidx:
+        messages.error(request, "Invalid payment identifier (pidx).")
+        return redirect('order_history')
+        
+    # Khalti Payment Lookup
+    url = "https://dev.khalti.com/api/v2/epayment/lookup/"
+    payload = json.dumps({"pidx": pidx})
+    headers = {
+        'Authorization': f'key {settings.KHALTI_SECRET_KEY}',
+        'Content-Type': 'application/json',
+    }
+
+    try:
+        response = requests.post(url, headers=headers, data=payload)
+        response_data = response.json()
+        
+        if response_data.get('status') == 'Completed':
+            order = get_object_or_404(Order, id=purchase_order_id, khalti_pidx=pidx)
+            order.payment_status = 'PAID'
+            order.transaction_id = transaction_id
+            order.save()
+            
+            # Clear user cart on successful payment
+            cart = get_cart(request)
+            cart.items.all().delete()
+            
+            messages.success(request, f"Payment successful for Order #{order.id}!")
+            return redirect('order_history')
+        else:
+            messages.error(request, f"Khalti payment not completed. Status: {response_data.get('status')}")
+            return redirect('order_history')
+            
+    except Exception as e:
+        messages.error(request, f"Payment verification error: {str(e)}")
+        return redirect('order_history')
 
 @login_required
 def order_history(request):
