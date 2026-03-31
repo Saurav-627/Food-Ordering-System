@@ -53,7 +53,7 @@ def create_users():
         username='saurav',
         defaults={'role': 'USER', 'phone': '9800000002', 'address': 'Patan, Lalitpur'}
     )
-    customer.set_password('saurav123')
+    customer.set_password('password@123')
     customer.role = 'USER'
     customer.save()
     print("Users created.")
