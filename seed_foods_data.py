@@ -40,7 +40,7 @@ def clear_data():
     print("Old data and media files cleared.")
 
 def create_users():
-    print("Creating users (rider & saurav)...")
+    print("Creating users (rider)...")
     rider, created = User.objects.get_or_create(
         username='rider',
         defaults={'role': 'DELIVERY_BOY', 'phone': '9800000001', 'address': 'Koteshwor, Kathmandu'}
@@ -50,7 +50,7 @@ def create_users():
     rider.save()
 
     customer, created = User.objects.get_or_create(
-        username='saurav',
+        username='user',
         defaults={'role': 'USER', 'phone': '9800000002', 'address': 'Patan, Lalitpur'}
     )
     customer.set_password('password@123')
