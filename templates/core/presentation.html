@@ -168,7 +168,7 @@ erDiagram
     <!-- Algorithms in Detail -->
     <section class="mb-20">
         <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-10 border-l-8 border-primary pl-6">03.
-            How the System Works (Algorithms)</h2>
+            System Process Logic</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
             <!-- Algorithm 1: Cart Merging -->
             <div class="group">
@@ -197,38 +197,56 @@ erDiagram
                 </div>
             </div>
 
-            <!-- Algorithm 2: Payment Verification -->
-            <div class="group">
-                <div class="bg-white p-10 rounded-[2.5rem] border border-gray-100 h-full shadow-2xl shadow-gray-100/50">
-                    <div class="w-14 h-14 bg-teal/10 rounded-2xl flex items-center justify-center mb-6">
-                        <i data-lucide="shield-check" class="w-8 h-8 text-teal"></i>
-                    </div>
-                    <h3 class="text-xl font-black uppercase mb-4 tracking-tight">2. SECURE KHALTI VERIFICATION</h3>
-                    <p class="text-sm text-gray-600 font-medium leading-relaxed mb-6">
-                        Guarantees the user actually paid by talking directly to Khalti's secure servers.
-                    </p>
-                    <div class="space-y-3 text-[10px] font-black uppercase tracking-widest text-gray-300">
-                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <span class="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center">1</span>
-                            <span class="text-gray-900">Get Unique Payment ID (PIDX)</span>
-                        </div>
-                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <span class="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center">2</span>
-                            <span class="text-gray-900">Request Status from Khalti Server</span>
-                        </div>
-                        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                            <span class="w-5 h-5 rounded-full bg-teal/10 text-teal flex items-center justify-center">3</span>
-                            <span class="text-gray-900">Mark "PAID" only if Status is "Completed"</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="mb-20">
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">04. 
+            Algorithms used in System (BCA Requirement)</h2>
+        <div class="bg-white rounded-[3rem] border border-gray-100 shadow-2xl shadow-gray-100/50 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr class="bg-gray-900 text-white text-[10px] uppercase tracking-widest font-black">
+                        <th class="p-6 w-16">S.N</th>
+                        <th class="p-6 w-48">Name of Algorithm</th>
+                        <th class="p-6 w-32">Module</th>
+                        <th class="p-6 w-32">Purpose</th>
+                        <th class="p-6">Summary of Working Logic</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-medium">
+                    <tr class="border-b border-gray-50">
+                        <td class="p-6 font-black">1.</td>
+                        <td class="p-6">
+                            <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-lg whitespace-nowrap">Quick / Merge Sort</span>
+                        </td>
+                        <td class="p-6 text-gray-400">Customer</td>
+                        <td class="p-6 font-bold">Menu Sorting</td>
+                        <td class="p-6 text-xs text-gray-500 leading-relaxed">System applies optimized SQL <strong>ORDER BY</strong> logic. Database internally uses Quick/Merge sort to handle sorting by price (low/high) and name (A-Z).</td>
+                    </tr>
+                    <tr class="border-b border-gray-50 bg-gray-50/30">
+                        <td class="p-6 font-black">2.</td>
+                        <td class="p-6">
+                            <span class="inline-block bg-teal/10 text-teal px-3 py-1 rounded-lg whitespace-nowrap">Binary / Linear Search</span>
+                        </td>
+                        <td class="p-6 text-gray-400">Cus & Admin</td>
+                        <td class="p-6 font-bold">Search Func</td>
+                        <td class="p-6 text-xs text-gray-500 leading-relaxed">Implements <strong>LIKE %keyword%</strong> queries across multiple fields. Searches name/description using indexed B-Tree paths for performance.</td>
+                    </tr>
+                    <tr>
+                        <td class="p-6 font-black">3.</td>
+                        <td class="p-6">
+                            <span class="inline-block bg-orange-100 text-primary px-3 py-1 rounded-lg whitespace-nowrap">Frequency Counting</span>
+                        </td>
+                        <td class="p-6 text-gray-400">Customer</td>
+                        <td class="p-6 font-bold">Favorites</td>
+                        <td class="p-6 text-xs text-gray-500 leading-relaxed">Aggregates orders using <strong>COUNT(DISTINCT user_id)</strong> to identify most preferred items. Fuels the "Customer Favorites" section.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </section>
 
     <!-- Data Flow Diagram -->
     <section class="mb-20">
-        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">04.
+        <h2 class="text-3xl font-black uppercase tracking-tight text-gray-900 mb-8 border-l-8 border-primary pl-6">05.
             Data Flow (Level 1)</h2>
         <div class="bg-orange-50/30 p-10 rounded-[3rem] border border-orange-100/50">
             <pre class="mermaid text-center">
