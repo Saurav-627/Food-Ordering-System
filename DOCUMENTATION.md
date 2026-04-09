@@ -188,6 +188,20 @@ sequenceDiagram
 ---
 
 ## 4. Algorithmic Purpose & Definitions
+The following table outlines the core algorithms implemented within the Khaja Kham system to ensure efficiency, data integrity, and enhanced user experience.
+
+### 4.2 Algorithms used in System
+These are the algorithms implemented in the Khaja Kham project for efficient and easy management of data.
+
+| S.N | Name of Algorithm | Module | Purpose in System | Summary of Working Logic |
+| :--- | :--- | :--- | :--- | :--- |
+| 1. | **Quick Sort / Merge Sort** | Customer | Menu Sorting | Menu items are sorted using the SQL `ORDER BY` clause. Users can sort items alphabetically (A-Z / Z-A) or by price (Low-High / High-Low). The database internally applies optimized sorting algorithms like **Quick Sort** or **Merge Sort** depending on the dataset size. |
+| 2. | **Binary Search / Linear Search** | Customer & Admin | Search Function | Customers search items using a `LIKE` query on the name or description. Admin performs multi-field search using a dynamic `WHERE` clause with `LIKE %keyword%` across users, orders, and payments tables. In indexed fields, the DB engine utilizes B-Tree (Binary-like) search, while non-indexed fields use Linear Search. |
+| 3. | **Frequency Counting Algorithm** | Customer | Most Preferred Items | This is a sale-based recommendation algorithm. The system counts how many unique customers ordered each item using `COUNT(DISTINCT user_id)`. Items with the highest unique customer count are displayed as **"Customer Favorites"** on the home page. |
+
+---
+
+## 5. Intelligence & Logic Details
 1.  **Collaborative Filtering**: Used for **Personalization**. It solves the "Discovery Problem" - helping users find new food they didn't know they wanted.
 2.  **Breadth-First Geolocation**: Used for **Logistics**. By mapping coordinates directly to the Rider dashboard, we solve the "Last-Mile Delivery" problem common in local food delivery.
 3.  **Atomic Pricing**: By taking a snapshot (`price_at_order`), we solve the **Financial Drift** problem, ensuring business reports always match what the customer paid.

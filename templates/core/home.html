@@ -182,6 +182,65 @@
     </div>
 </div>
 
+<!-- Customer Favorites (Frequency Counting Algorithm) -->
+<div class="mb-24">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-6 mb-12">
+        <div>
+            <h2 class="text-4xl font-black text-gray-900 tracking-tighter uppercase">Customer <span
+                    class="text-teal italic">Favorites</span></h2>
+            <p class="text-gray-500 font-medium text-sm mt-2 uppercase tracking-widest">Based on unique customer choices</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {% for food in most_preferred %}
+        <div
+            class="group relative bg-white rounded-[2.5rem] p-5 border border-gray-100 hover:border-teal/20 transition-all duration-500 hover:shadow-2xl hover:shadow-teal-50">
+            <div class="relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 bg-gray-50">
+                {% if food.image %}
+                <img src="{{ food.image.url }}"
+                    class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    alt="{{ food.name }}">
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center text-gray-200">
+                    <i data-lucide="utensils" class="w-20 h-20 opacity-20"></i>
+                </div>
+                {% endif %}
+
+                <div class="absolute top-4 left-4 z-10">
+                    <span class="bg-teal text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
+                        #{{ forloop.counter }} Popular
+                    </span>
+                </div>
+                
+                <div
+                    class="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-white/50">
+                    <span class="text-xs font-black text-teal">Rs. {{ food.price }}</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3
+                    class="text-lg font-black text-gray-900 group-hover:text-teal transition-colors uppercase tracking-tight truncate">
+                    {{ food.name }}</h3>
+                <div class="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <span>{{ food.category.name }}</span>
+                    <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                    <span class="text-teal">{{ food.unique_customer_count }} Customers Ordered</span>
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <a href="{% url 'food_detail' food.slug %}"
+                        class="flex-1 bg-teal text-white text-[10px] font-black py-4 rounded-2xl text-center hover:bg-teal-600 transition-colors uppercase tracking-widest shadow-xl shadow-teal-100">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
 {% if not user.is_authenticated %}
 <!-- Special Promotion -->
 <div class="bg-gray-900 rounded-[3rem] p-12 relative overflow-hidden group">
