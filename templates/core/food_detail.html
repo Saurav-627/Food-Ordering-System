@@ -57,21 +57,31 @@
             </p>
         </div>
 
-        <div class="flex items-end gap-2">
-            <span class="text-gray-400 text-lg font-medium mb-1">Price:</span>
-            <span class="text-4xl font-black text-primary">Rs. {{ food.price }}</span>
+        <div class="flex items-center gap-6">
+            <div class="flex items-end gap-2">
+                <span class="text-gray-400 text-lg font-medium mb-1">Price:</span>
+                <span class="text-4xl font-black text-primary">Rs. {{ food.price }}</span>
+            </div>
+            <div class="h-10 w-px bg-gray-100"></div>
+            <div>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Available</p>
+                <p class="text-lg font-black {% if food.stock > 0 %}text-teal{% else %}text-red-500{% endif %}">
+                    {{ food.stock }} units
+                </p>
+            </div>
         </div>
 
         <!-- Add to Cart Form -->
         <form id="add-to-cart-form" action="{% url 'add_to_cart' food.id %}" method="post" class="space-y-6">
             {% csrf_token %}
             <div class="flex flex-wrap items-center gap-4">
+                {% if food.stock > 0 %}
                 <div class="flex items-center bg-gray-100 p-1.5 rounded-2xl border border-gray-200">
                     <button type="button" onclick="decrementQty()"
                         class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white hover:shadow-md transition-all text-gray-600">
                         <i data-lucide="minus" class="w-4 h-4"></i>
                     </button>
-                    <input type="number" id="quantity" name="quantity" value="1" min="1"
+                    <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ food.stock }}"
                         class="w-16 bg-transparent text-center font-bold text-lg focus:outline-none" readonly>
                     <button type="button" onclick="incrementQty()"
                         class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-white hover:shadow-md transition-all text-gray-600">
@@ -84,6 +94,13 @@
                     <i data-lucide="shopping-bag" class="w-6 h-6"></i>
                     Add to Cart
                 </button>
+                {% else %}
+                <button type="button" disabled
+                    class="flex-1 bg-gray-200 text-gray-400 px-8 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 cursor-not-allowed">
+                    <i data-lucide="x-circle" class="w-6 h-6"></i>
+                    Out of Stock
+                </button>
+                {% endif %}
             </div>
         </form>
 
@@ -250,15 +267,21 @@
 {% endif %}
 
 <script>
+    const MAX_STOCK = {{ food.stock }};
+
     function incrementQty() {
         const input = document.getElementById('quantity');
-        input.value = parseInt(input.value) + 1;
+        const current = parseInt(input.value);
+        if (current < MAX_STOCK) {
+            input.value = current + 1;
+        }
     }
 
     function decrementQty() {
         const input = document.getElementById('quantity');
-        if (parseInt(input.value) > 1) {
-            input.value = parseInt(input.value) - 1;
+        const current = parseInt(input.value);
+        if (current > 1) {
+            input.value = current - 1;
         }
     }
 
@@ -308,7 +331,12 @@
                 'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => { throw new Error(data.message || 'Error adding to cart') });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success') {
                     // Update cart count
@@ -333,7 +361,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                alert(error.message);
                 btn.disabled = false;
                 btn.innerHTML = originalText;
                 lucide.createIcons();

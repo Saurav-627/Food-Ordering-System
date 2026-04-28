@@ -95,7 +95,17 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end">
+                <div class="lg:col-span-3 flex items-center justify-end gap-3 pt-6 border-t border-gray-50 mt-4">
+                    {% if order.status == 'PENDING' %}
+                    <form action="{% url 'cancel_order' order.id %}" method="post" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-colors flex items-center gap-2">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            Cancel Order
+                        </button>
+                    </form>
+                    {% endif %}
                     <button
                         class="bg-gray-50 text-gray-900 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-100 transition-colors flex items-center gap-2">
                         <i data-lucide="repeat" class="w-4 h-4"></i>

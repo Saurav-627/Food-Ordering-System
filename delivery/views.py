@@ -7,22 +7,27 @@ from django.conf import settings
 @login_required
 def dashboard(request):
     if request.user.role != 'DELIVERY_BOY':
-        messages.error(request, "Access denied.")
+        messages.error(request, "Access denied. Only riders can access this panel.")
         return redirect('home')
         
-    # Orders assigned to this delivery boy
-    assigned_orders = Order.objects.filter(delivery_boy=request.user).exclude(status='COMPLETED').order_by('-created_at')
+    # Orders assigned to this delivery boy (Incomplete only)
+    assigned_orders = Order.objects.filter(
+        delivery_boy=request.user
+    ).exclude(status__in=['COMPLETED', 'CANCELLED']).order_by('-created_at')
     
-    # Available orders (Pending and not assigned) - simplistic logic for now
-    available_orders = Order.objects.filter(status='PENDING', delivery_boy__isnull=True).order_by('-created_at')
+    # Available orders (Pending and not assigned)
+    available_orders = Order.objects.filter(
+        status='PENDING', 
+        delivery_boy__isnull=True
+    ).order_by('-created_at')
     
-    completed_orders = Order.objects.filter(delivery_boy=request.user, status='COMPLETED').order_by('-created_at')
-    total_earnings = completed_orders.count() * 50
+    # Calculate earnings from completed orders
+    completed_orders_count = Order.objects.filter(delivery_boy=request.user, status='COMPLETED').count()
+    total_earnings = completed_orders_count * 50
     
     return render(request, 'delivery/dashboard.html', {
         'assigned_orders': assigned_orders,
         'available_orders': available_orders,
-        'completed_orders': completed_orders[:10], # Show only last 10 in history
         'total_earnings': total_earnings,
         'google_maps_key': settings.GOOGLE_MAPS_API_KEY
     })
@@ -33,11 +38,11 @@ def accept_order(request, order_id):
         return redirect('home')
         
     order = get_object_or_404(Order, id=order_id)
-    if order.delivery_boy is None:
+    if order.delivery_boy is None and order.status == 'PENDING':
         order.delivery_boy = request.user
         order.status = 'ACCEPTED'
         order.save()
-        messages.success(request, f"Order #{order.id} accepted.")
+        messages.success(request, f"Order #{order.id} accepted. Please start delivery when ready.")
     
     return redirect('delivery_dashboard')
 
@@ -48,6 +53,7 @@ def update_status(request, order_id):
         
     order = get_object_or_404(Order, id=order_id)
     if order.delivery_boy != request.user:
+        messages.error(request, "You are not authorized to update this order.")
         return redirect('delivery_dashboard')
         
     if request.method == 'POST':

@@ -4,6 +4,7 @@ from orders.models import Cart, Order
 from .serializers import CategorySerializer, FoodSerializer, CartSerializer, OrderSerializer
 from recommendations.utils import get_recommendations_for_user, get_people_also_ordered
 from orders.utils import get_cart
+from django.db.models import Q
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
@@ -26,7 +27,12 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        user = self.request.user
+        # Customers only see their own orders
+        # Riders see their own orders AND orders they are delivering
+        if user.role == 'DELIVERY_BOY':
+            return Order.objects.filter(Q(user=user) | Q(delivery_boy=user))
+        return Order.objects.filter(user=user)
 
 class RecommendationView(views.APIView):
     permission_classes = [permissions.IsAuthenticated]
