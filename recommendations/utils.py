@@ -69,9 +69,6 @@ def train_co_occurrence():
 
 def get_recommendations_for_user(user_id, top_n=5):
     # Simple logic: get user's last rated/ordered item, find similar items
-    # Better logic: Weighted sum of similar items
-    
-    # For now, let's use the last item user interacted with
     last_rating = Rating.objects.filter(user_id=user_id).order_by('-created_at').first()
     if not last_rating:
         return []
@@ -80,15 +77,14 @@ def get_recommendations_for_user(user_id, top_n=5):
     if sim_matrix.empty:
         return []
         
-    food_id = str(last_rating.food_id) # Pandas columns might be strings if loaded from JSON
+    food_id = str(last_rating.food_id) 
     if food_id not in sim_matrix.columns:
-        # Try int
         food_id = last_rating.food_id
         if food_id not in sim_matrix.columns:
             return []
             
     similar_scores = sim_matrix[food_id].sort_values(ascending=False)
-    similar_items = similar_scores.index[1:top_n+1] # Exclude self
+    similar_items = similar_scores.index[1:top_n+1] 
     
     return Food.objects.filter(id__in=similar_items)
 

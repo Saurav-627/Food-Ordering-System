@@ -5,6 +5,8 @@ from .serializers import CategorySerializer, FoodSerializer, CartSerializer, Ord
 from recommendations.utils import get_recommendations_for_user, get_people_also_ordered
 from orders.utils import get_cart
 from django.db.models import Q
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
@@ -13,8 +15,10 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 class FoodViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Food.objects.filter(is_available=True)
     serializer_class = FoodSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category']
     search_fields = ['name', 'description']
+    ordering_fields = ['price', 'created_at']
 
 class CartViewSet(viewsets.ViewSet):
     def list(self, request):

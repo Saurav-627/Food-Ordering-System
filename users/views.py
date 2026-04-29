@@ -36,11 +36,10 @@ def login_view(request):
         from users.models import User
         auth_username = identifier
         if '@' in identifier:
-            try:
-                user_obj = User.objects.get(email=identifier)
+            # Look up user by email if identifier looks like an email
+            user_obj = User.objects.filter(email=identifier).first()
+            if user_obj:
                 auth_username = user_obj.username
-            except User.DoesNotExist:
-                pass
 
         user = authenticate(username=auth_username, password=password)
         

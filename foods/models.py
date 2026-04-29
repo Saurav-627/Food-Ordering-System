@@ -19,8 +19,8 @@ class Category(models.Model):
         verbose_name_plural = 'Categories'
 
 class Food(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='foods')
-    name = models.CharField(max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='foods', db_index=True)
+    name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -29,6 +29,9 @@ class Food(models.Model):
     stock = models.PositiveIntegerField(default=50)
     prep_time_min = models.PositiveIntegerField(default=15)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
         if not self.slug:

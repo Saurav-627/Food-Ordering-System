@@ -7,6 +7,12 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'phone', 'address', 'role')
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and User.objects.filter(email=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
+
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         # Remove any non-numeric characters for checking length

@@ -7,15 +7,22 @@ def home(request):
     categories = Category.objects.all()
     featured_foods = Food.objects.filter(is_available=True).order_by('?')[:4]
     
-    # Frequency Counting Algorithm for Most Preferred Items
+    # Algorithm #3: Frequency Counting Algorithm for Most Preferred Items (Global)
     most_preferred = Food.objects.annotate(
         unique_customer_count=Count('order_items__order__user', distinct=True)
     ).order_by('-unique_customer_count')[:4]
+    
+    # Algorithm #4: Collaborative Filtering for Personalized Recommendations (Specific to User)
+    personalized_recs = []
+    if request.user.is_authenticated:
+        from recommendations.utils import get_recommendations_for_user
+        personalized_recs = get_recommendations_for_user(request.user.id, top_n=4)
     
     context = {
         'categories': categories,
         'featured_foods': featured_foods,
         'most_preferred': most_preferred,
+        'personalized_recs': personalized_recs,
     }
     return render(request, 'core/home.html', context)
 
