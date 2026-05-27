@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from foods.models import Category, Food, Rating
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count
+from .algorithms import quick_sort, binary_search
 
 def home(request):
     categories = Category.objects.all()
@@ -11,8 +12,7 @@ def home(request):
     most_preferred = Food.objects.annotate(
         unique_customer_count=Count('order_items__order__user', distinct=True)
     ).order_by('-unique_customer_count')[:4]
-    
-    # Algorithm #4: Collaborative Filtering for Personalized Recommendations (Specific to User)
+
     personalized_recs = []
     if request.user.is_authenticated:
         from recommendations.utils import get_recommendations_for_user
@@ -37,20 +37,34 @@ def food_list(request):
         foods = foods.filter(category__slug=category_slug)
         
     if search_query:
-        # Binary Search / Linear Search (LIKE Query)
-        foods = foods.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
+        # Perform exact‑match search using custom binary_search algorithm
+        # Ensure we have a sorted list of food names (case‑insensitive)
+        sorted_foods = list(foods.order_by('name'))
+        name_list = [f.name.lower() for f in sorted_foods]
+        idx = binary_search(name_list, search_query.lower())
+        if idx is not None:
+            # Exact match found – return a queryset containing that single food
+            foods = Food.objects.filter(id=sorted_foods[idx].id)
+        else:
+            # No exact match – return empty queryset
+            foods = Food.objects.none()
         
-    # Quick Sort / Merge Sort (Internal SQL Sort)
+    # Algorithmic sorting using quick_sort (client‑side)
+    # Convert queryset to list for in‑memory sorting
+    food_list = list(foods)
     if sort_by == 'price_low':
-        foods = foods.order_by('price')
+        food_list = quick_sort(food_list, key=lambda f: f.price)
     elif sort_by == 'price_high':
-        foods = foods.order_by('-price')
+        food_list = quick_sort(food_list, key=lambda f: -f.price)
     elif sort_by == 'name_az':
-        foods = foods.order_by('name')
+        food_list = quick_sort(food_list, key=lambda f: f.name.lower())
     elif sort_by == 'name_za':
-        foods = foods.order_by('-name')
+        food_list = quick_sort(food_list, key=lambda f: f.name.lower())
+        food_list.reverse()
     else:
-        foods = foods.order_by('-created_at')
+        food_list = quick_sort(food_list, key=lambda f: f.created_at)
+        food_list.reverse()
+    foods = food_list
         
     categories = Category.objects.all()
     
