@@ -1,5 +1,7 @@
 import os
 import django
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import random
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'khaja_kham.settings')
@@ -11,6 +13,18 @@ from orders.models import Order, OrderItem
 
 def seed_complete_data():
     # 1. Ensure categories and foods exist
+    # Mapping of food names to image filenames (must match files in media/foods)
+    image_map = {
+        'Momo': 'momo.png',
+        'Thakali Set': 'thakali-set.png',
+        'Sel Roti': 'sel-roti.png',
+        'Burger': 'burger.png',
+        'Pizza': 'pizza.png',
+        'Fries': 'fries.png',
+        'Coke': 'coke.png',
+        'Lassi': 'lassi.png',
+        'Ice Cream': 'ice-cream.png',
+    }
     categories = ['Nepali Specials', 'Fast Food', 'Beverages', 'Desserts']
     for cat_name in categories:
         Category.objects.get_or_create(name=cat_name)
@@ -38,9 +52,13 @@ def seed_complete_data():
     foods = []
     for name, cat_name, price in food_data:
         cat = Category.objects.get(name=cat_name)
-        food, _ = Food.objects.get_or_create(
-            name=name, 
-            defaults={'category': cat, 'price': price, 'description': f'Delicious {name}'}
+        img_filename = image_map.get(name)
+        defaults = {'category': cat, 'price': price, 'description': f'Delicious {name}'}
+        if img_filename:
+            defaults['image'] = f'foods/{img_filename}'
+        food, _ = Food.objects.update_or_create(
+            name=name,
+            defaults=defaults,
         )
         foods.append(food)
 
