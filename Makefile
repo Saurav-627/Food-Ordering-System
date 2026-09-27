@@ -8,8 +8,8 @@
 #   make clean        # remove python artefacts
 
 # Detect OS (Windows) and use the venv Python executable
-PYTHON := .venv\\Scripts\\python.exe
-PIP := .venv\\Scripts\\pip.exe
+PYTHON := .venv\\Scripts\\python.exe || venv/bin/python
+PIP := .venv\\Scripts\\pip.exe || venv/bin/pip
 
 # Default target
 .PHONY: help
